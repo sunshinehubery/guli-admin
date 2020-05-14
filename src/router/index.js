@@ -76,6 +76,30 @@ export const constantRouterMap = [
     ]
   },
   {
+    path: '/teacher',
+    component: Layout,
+    redirect: '/teacher/list',
+    name: '讲师管理',
+    meta: {
+      title: '讲师管理',
+      icon: 'example'
+    },
+    children: [
+      {
+        path: 'list',
+        component: () => import('@/views/teacher/list/index'),
+        name: '讲师列表',
+        meta: { title: '讲师列表', icon: 'list' }
+      },
+      {
+        path: 'save',
+        component: () => import('@/views/teacher/edit/index'),
+        name: '添加讲师',
+        meta: { title: '添加讲师', icon: 'edit' }
+      }
+    ]
+  },
+  {
     path: '/documentation',
     component: Layout,
     redirect: '/documentation/index',
