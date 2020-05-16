@@ -57,7 +57,7 @@
         <el-table-column prop="sort" label="排序" width="60" align="center" />
         <el-table-column label="操作" width="200" align="center">
             <template slot-scope="scope">
-                <router-link :to="'/edu/teacher/edit/'+scope.row.id">
+                <router-link :to="'/teacher/edit/'+scope.row.id">
                     <el-button type="primary" size="mini" icon="el-icon-edit">修改</el-button>
                 </router-link>
                 <el-button type="danger" size="mini" icon="el-icon-delete" @click="removeDataById(scope.row.id)">删除</el-button>
@@ -71,7 +71,7 @@
             :total="total"
             style="padding: 30px 0; text-align: center;"
             layout="total, prev, pager, next, jumper"
-            @current-change="fetchData"/>
+            @current-change="getTeacherPageList"/>
      </div>
 </template>
 
@@ -94,12 +94,12 @@ export default {
     },
     methods: {
         // 调用api层获取数据库中的数据
-        getTeacherPageList(){
+        getTeacherPageList(current = 1){
+            this.current = current
             this.listLoading = true
             teacher.getTeacherPageList(this.current,this.limit,this.searchObj)
                 .then(response => {
-                    console.log(response)
-                    this.list = response.data.data.rows
+                    this.list = response.data.data.items
                     this.total = response.data.data.total
                     this.listLoading = false
                 })
@@ -111,6 +111,34 @@ export default {
         resetData(){
             this.searchObj = {}
             this.getTeacherPageList()
+        },
+        // 逻辑删除
+        removeDataById(id){
+            this.$confirm('此操作将永久删除该记录, 是否继续?', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(() => {
+                return teacher.removeById(id)
+            }).then(() => {
+                this.getTeacherPageList()
+                this.$message({
+                    type: 'success',
+                    message: '删除成功!'
+                })
+            }).catch((response) => { // 失败
+                if (response === 'cancel') {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    })
+                } else {
+                    this.$message({
+                        type: 'error',
+                        message: '删除失败'
+                    })
+                }
+            })
         }
     }
 }
