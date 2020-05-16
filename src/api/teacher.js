@@ -8,7 +8,7 @@ export default {
         return request({
             url: `${api_name}/${current}/${limit}`,
             method: 'get',
-            data: searchObj
+            params: searchObj
           })
     }
 }
