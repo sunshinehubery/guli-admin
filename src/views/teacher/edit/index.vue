@@ -5,7 +5,7 @@
         <el-input v-model="teacher.name"/>
       </el-form-item>
       <el-form-item label="讲师排序">
-        <el-input-number v-model="teacher.sort" controls-position="right" min="0"/>
+        <el-input-number v-model="teacher.sort" controls-position="right" :min="0"/>
       </el-form-item>
       <el-form-item label="讲师头衔">
         <el-select v-model="teacher.level" clearable placeholder="请选择">
@@ -144,7 +144,7 @@ export default {
     // 上传成功后的回调函数
     cropSuccess(data) {
       this.imagecropperShow = false
-      this.teacher.avatar = data.url
+      this.teacher.avatar = data.data.url
       // 上传成功后，重新打开上传组件时初始化组件，否则显示上一次的上传结果
       this.imagecropperKey = this.imagecropperKey + 1
     },
