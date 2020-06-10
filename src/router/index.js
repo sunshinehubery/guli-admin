@@ -82,7 +82,7 @@ export const constantRouterMap = [
     name: '讲师管理',
     meta: {
       title: '讲师管理',
-      icon: 'example'
+      icon: 'user'
     },
     children: [
       {
@@ -104,6 +104,30 @@ export const constantRouterMap = [
         meta: { title: '修改讲师', icon: 'edit' },
         hidden: true
       }
+    ]
+  },
+  {
+    path: '/edu/subject',
+    component: Layout,
+    redirect: '/edu/subject/list',
+    name: '课程分类管理',
+    meta: {
+      title: '课程分类管理',
+      icon: 'documentation'
+    },
+    children: [
+      {
+        path: 'list',
+        component: () => import('@/views/edu/subject/list/index'),
+        name: '课程分类列表',
+        meta: { title: '课程分类列表', icon: 'list' }
+      },
+      {
+        path: 'import',
+        component: () => import('@/views/edu/subject/import/index'),
+        name: '导入课程分类',
+        meta: { title: '导入课程分类', icon: 'edit' }
+      },
     ]
   },
   {

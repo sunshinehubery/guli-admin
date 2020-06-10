@@ -40,7 +40,7 @@
           :width="300"
           :height="300"
           :key="imagecropperKey"
-          :url="base_api"
+          :url="OSS_API + 'oss/file/upload'"
           field="file"
           @close="close"
           @crop-upload-success="cropSuccess"/>
@@ -72,7 +72,7 @@ export default {
       saveBtnDisabled: false, // 保存按钮是否禁用
       imagecropperShow: false, // 是否显示上传组件
       imagecropperKey: 0, // 上传组件id
-      base_api: 'http://localhost:8083/oss/file/upload'
+      OSS_API: process.env.OSS_API, //上传图片组件api
     }
   },
   created() {
