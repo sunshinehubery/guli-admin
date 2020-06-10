@@ -63,7 +63,7 @@
                         message: '导入成功'
                     })
                     //跳转回到列表页面
-                    this.$router.push({path:'/subject'})
+                    this.$router.push({ path: '/edu/subject/list' })
                 } else {
                     //获取返回list集合
                     const messages = response.data
@@ -76,7 +76,7 @@
                         dangerouslyUseHTMLString: true
                     })
                     //跳转回到列表页面
-                    this.$router.push({path:'/subject'})
+                    this.$router.push({ path: '/edu/subject/list' })
                 }
             },
             //上传失败调用的方法
