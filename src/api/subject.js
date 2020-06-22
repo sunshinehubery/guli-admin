@@ -24,5 +24,13 @@ export default {
       method: 'post',
       data: eduSubject
     })
+  },
+  // 新增课程二级分类
+  saveLevelTwo(eduSubject){
+    return request({
+      url: `${api_name}/save-level-two`,
+      method: 'post',
+      data: eduSubject
+    })
   }
 }

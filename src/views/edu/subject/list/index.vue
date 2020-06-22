@@ -18,7 +18,7 @@
             v-if="node.level == 1"
             type="text"
             size="mini"
-            @click="() => append(data)">添加</el-button>
+            @click="() => addTwodialog(data)">添加二级分类</el-button>
           <el-button
             v-if="node.level == 2"
             type="text"
@@ -28,14 +28,14 @@
       </span>
     </el-tree>
     <el-dialog :visible.sync="dialogFormVisible" title="添加分类">
-      <el-form :model="subject" label-width="120px">
+      <el-form :model="eduSubject" label-width="120px">
         <el-form-item label="分类标题">
-          <el-input v-model="subject.title"/>
+          <el-input v-model="eduSubject.title"/>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="appendLevelOne()">确 定</el-button>
+        <el-button @click="dialogFormVisible = false;eduSubject.title='';eduSubject.parentId=''">取 消</el-button>
+        <el-button type="primary" @click="append()">确 定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -70,7 +70,6 @@ export default {
   methods: {
     fetchNodeList() {
       subject.nestedList().then(response => {
-        console.log(response)
         if (response.data.code === 20000) {
           this.subjectList = response.data.data
         }
@@ -109,21 +108,68 @@ export default {
         }
       })
     },
+    // 添加分类（一级或二级）
+    append(){
+      if(!this.eduSubject.parentId){
+        this.appendLevelOne()
+      }else{
+        this.appendLevelTwo()
+      }
+    },
     // 保存课程一级分类
     appendLevelOne() {
       subject.saveLevelOne(this.eduSubject).then(
         response => {
-          this.$message({
-            type: success,
-            message: '保存成功!'
-          })
-          this.dialogFormVisible = false// 如果保存成功则关闭对话框
-          this.fetchNodeList()// 刷新列表
+          if(response.data.code == 20000){
+            this.$message({
+              type: 'success',
+              message: '保存成功!'
+            })
+            this.dialogFormVisible = false// 如果保存成功则关闭对话框
+            this.fetchNodeList()// 刷新列表
+            this.eduSubject.title = '' // 清空标题
+          }else{
+            this.$message({
+              type: 'error',
+              message: response.data.message
+            })
+          }
         }
       ).catch(response => {
         this.$message({
-          type: 'error',
-          message: '保存失败'
+          code: 'error',
+          message: '保存失败!'
+        })
+      })
+    },
+    addTwodialog(data){
+      this.dialogFormVisible = true
+      this.eduSubject.parentId = data.id
+    },
+    // 保存课程二级分类
+    appendLevelTwo(){
+      subject.saveLevelTwo(this.eduSubject).then(
+        response => {
+          if(response.data.code == 20000){
+            this.$message({
+              type: 'success',
+              message: '保存成功!'
+            })
+            this.dialogFormVisible = false// 如果保存成功则关闭对话框
+            this.fetchNodeList()// 刷新列表
+            this.eduSubject.title = '' // 清空标题
+            this.eduSubject.parentId = '' // 清空父类id
+          }else{
+            this.$message({
+              type: 'error',
+              message: response.data.message
+            })
+          }
+        }
+      ).catch(response => {
+        this.$message({
+          code: 'error',
+          message: '保存失败!'
         })
       })
     }
