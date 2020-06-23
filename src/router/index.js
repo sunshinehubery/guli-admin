@@ -127,7 +127,49 @@ export const constantRouterMap = [
         component: () => import('@/views/edu/subject/import/index'),
         name: '导入课程分类',
         meta: { title: '导入课程分类', icon: 'edit' }
+      }
+    ]
+  },
+  {
+    path: '/edu/course',
+    component: Layout,
+    redirect: '/edu/course/list',
+    name: '课程管理',
+    meta: { title: '课程管理', icon: 'form' },
+    children: [
+      {
+        path: 'list',
+        name: 'EduCourseList',
+        component: () => import('@/views/edu/course/list/index'),
+        meta: { title: '课程列表' }
       },
+      {
+        path: 'info',
+        name: 'EduCourseInfo',
+        component: () => import('@/views/edu/course/info/index'),
+        meta: { title: '发布课程' }
+      },
+      {
+        path: 'info/:id',
+        name: 'EduCourseInfoEdit',
+        component: () => import('@/views/edu/course/info/index'),
+        meta: { title: '编辑课程基本信息', noCache: true },
+        hidden: true
+      },
+      {
+        path: 'chapter/:id',
+        name: 'EduCourseChapterEdit',
+        component: () => import('@/views/edu/course/chapter/index'),
+        meta: { title: '编辑课程大纲', noCache: true },
+        hidden: true
+      },
+      {
+        path: 'publish/:id',
+        name: 'EduCoursePublishEdit',
+        component: () => import('@/views/edu/course/publish/index'),
+        meta: { title: '发布课程', noCache: true },
+        hidden: true
+      }
     ]
   },
   {
