@@ -37,27 +37,32 @@
         <el-select
           v-model="eduCourseDto.teacherId"
           placeholder="请选择">
-          <div style="bottom: 0;width: 100%;background: #fff">
-            <el-pagination
-                    small
-                    @current-change="handleCurrentChange"
-                    :current-page="current"
-                    :page-size="size"
-                    layout="prev, pager,next,total"
-                    :total="total">
-            </el-pagination>
-          </div>
           <el-option
             v-for="teacher in teacherList"
             :key="teacher.id"
             :label="teacher.name"
             :value="teacher.id"/>
+          <div style="bottom: 0;width: 100%;background: #fff">
+            <el-pagination
+                    small
+                    @current-change="getTeacherPageList"
+                    @size-change="handleSizeChange"
+                    :current-page="current"
+                    :page-size="limit"
+                    :page-sizes="[1,2,5,10,20]"
+                    layout="sizes,prev,next"
+                    :total="total">
+            </el-pagination>
+          </div>
         </el-select>
       </el-form-item>
       <el-form-item label="总课时">
         <el-input-number :min="0" v-model="eduCourseDto.lessonNum" controls-position="right" placeholder="请填写课程的总课时数"/>
       </el-form-item>
-      <!-- 课程简介 TODO -->
+      <!-- 课程简介 -->
+      <el-form-item label="课程简介">
+        <Tinymce v-model="eduCourseDto.description" :height="300"/>
+      </el-form-item>
       <!-- 课程封面 TODO -->
       <el-form-item label="课程价格">
         <el-input-number :min="0" v-model="eduCourseDto.price" controls-position="right" placeholder="免费课程请设置为0元"/> 元
@@ -71,6 +76,8 @@
 <script>
 import course from '@/api/course'
 import subject from '@/api/subject'
+import teacher from '@/api/teacher'
+import Tinymce from '@/components/Tinymce'
 
 const defaultForm = {
   title: '',
@@ -82,6 +89,7 @@ const defaultForm = {
   price: 0
 }
 export default {
+  components:{Tinymce},
   data() {
     return {
       saveBtnDisabled: false, // 保存按钮是否禁用
@@ -113,6 +121,8 @@ export default {
       }
       // 初始化分类列表
       this.initSubjectList()
+      // 初始化讲师列表
+      this.getTeacherPageList()
     },
     next() {
       this.saveBtnDisabled = true
@@ -160,24 +170,51 @@ export default {
     },
     //触发change事件，显示一级分类里面所有的二级分类
     subjectLevelOneChanged(value) {
-        //获取选择一级分类的id值
-        //根据一级分类id值，获取下面的所有二级分类
+      //获取选择一级分类的id值
+      //根据一级分类id值，获取下面的所有二级分类
 
-        //1 遍历所有一级分类集合
-        //2 获取每个一级分类
-        //3 判断value值和遍历出来的每个一级分类id值是否一样，
-        //如果一样，获取下面二级分类，是child
-        for(var i=0;i<this.subjectNestedList.length;i++) {
-            //获取每个一级分类
-            var levelOne = this.subjectNestedList[i]
-            //判断value值和遍历出来的每个一级分类id值是否一样
-            if(levelOne.id === value) {
-                //获取下面二级分类，是children
-                this.subSubjectList = levelOne.subjectVoList
-                this.eduCourseDto.subjectId = ''
-            }
+      //1 遍历所有一级分类集合
+      //2 获取每个一级分类
+      //3 判断value值和遍历出来的每个一级分类id值是否一样，
+      //如果一样，获取下面二级分类，是child
+      for(var i=0;i<this.subjectNestedList.length;i++) {
+        //获取每个一级分类
+        var levelOne = this.subjectNestedList[i]
+        //判断value值和遍历出来的每个一级分类id值是否一样
+        if(levelOne.id === value) {
+            //获取下面二级分类，是children
+            this.subSubjectList = levelOne.subjectVoList
+            this.eduCourseDto.subjectId = ''
         }
+      }
+    },
+    // 修改每页获取条数
+    handleSizeChange(val){
+      this.limit = val
+      this.getTeacherPageList()
+    },
+    // 获取讲师列表信息（分页）
+    getTeacherPageList(current = 1) {
+      this.current = current
+      this.listLoading = true
+      teacher.getTeacherPageList(this.current, this.limit, this.searchObj)
+        .then(response => {
+          this.teacherList = response.data.data.records
+          this.total = response.data.data.total
+          this.listLoading = false
+        })
+        .catch(response => {
+          console.log(response)
+        })
     },
   }
 }
 </script>
+<style lang="scss" rel="stylesheet/scss" scoped>
+  .el-pagination {
+    text-align: center
+  }
+  .tinymce-container {
+    line-height: 29px;
+  }
+</style>
