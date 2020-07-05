@@ -63,7 +63,17 @@
       <el-form-item label="课程简介">
         <Tinymce v-model="eduCourseDto.description" :height="300"/>
       </el-form-item>
-      <!-- 课程封面 TODO -->
+      <!-- 课程封面 -->
+      <el-form-item label="课程封面">
+        <el-upload
+          :show-file-list="false"
+          :on-success="handleAvatarSuccess"
+          :before-upload="beforeAvatarUpload"
+          :action="OSS_API+'oss/file/upload?host=cover'"
+          class="avatar-uploader">
+          <img :src="eduCourseDto.cover" />
+        </el-upload>
+      </el-form-item>
       <el-form-item label="课程价格">
         <el-input-number :min="0" v-model="eduCourseDto.price" controls-position="right" placeholder="免费课程请设置为0元"/> 元
       </el-form-item>
@@ -81,11 +91,12 @@ import Tinymce from '@/components/Tinymce'
 
 const defaultForm = {
   title: '',
+  subjectParentId: '',
   subjectId: '',
   teacherId: '',
   lessonNum: 0,
   description: '',
-  cover: '',
+  cover: process.env.OSS_PATH + '/cover/default.jpg',
   price: 0
 }
 export default {
@@ -100,6 +111,7 @@ export default {
       current: 1, // 当前页
       limit: 5, // 每页记录数
       total: 0, // 总页数
+      OSS_API: process.env.OSS_API, //上传图片组件api
     }
   },
   watch: {
@@ -115,31 +127,47 @@ export default {
     init() {
       if(this.$route.params && this.$route.params.id){
         const id = this.$route.params.id
-        console.log(id)
+        this.getCourseInfoById(id)
       }else{
         this.eduCourseDto = {...defaultForm}
+        // 初始化分类列表
+        this.initSubjectList()
+        // 初始化讲师列表
+        this.getTeacherPageList()
       }
-      // 初始化分类列表
-      this.initSubjectList()
-      // 初始化讲师列表
-      this.getTeacherPageList()
+    },
+    // 根据ID查询课程
+    getCourseInfoById(id){
+      course.getCourseInfoById(id).then(response => {
+          this.eduCourseDto = response.data.data
+          subject.nestedList().then(response => {
+            this.subjectNestedList = response.data.data
+            for(let i = 0; i < this.subjectNestedList.length; i++){
+              if(this.subjectNestedList[i].id === this.eduCourseDto.subjectParentId){
+                this.subSubjectList = this.subjectNestedList[i].subjectVoList
+              }
+            }
+          })
+          // 初始化讲师列表
+        this.getTeacherPageList()
+      }).catch(response => {
+        this.$message({
+          code: 'error',
+          message: '获取数据失败！'
+        })
+      })
     },
     next() {
       this.saveBtnDisabled = true
-      //判断是新增还是保存
-      if(!this.eduCourseDto.id){
-        this.saveData()
-      }else{
-        this.updateData()
-      }
+      this.saveOrUpdateData()
     },
     // 保存课程数据
-    saveData(){
+    saveOrUpdateData(){
       course.saveCourseInfo(this.eduCourseDto).then(response => {
         if(response.data.code == 20000){
           this.$message({
             type: 'success',
-            message: '保存成功!'
+            message: response.data.message
           })
           // 保存成功将response传递给下一个then
           return response
@@ -147,20 +175,16 @@ export default {
           this.$message({
               type: 'error',
               message: response.data.message
-            })
+          })
         }
       }).then(response => {
-        this.$router.push({ path: '/edu/course/chapter/' + response.data.courseId })
+        this.$router.push({ path: '/edu/course/chapter/' + response.data.data })
       }).catch(response => {
         this.$message({
           code: 'error',
           message: '保存失败!'
         })
       })
-    },
-    // 修改课程数据
-    updateData(){
-      this.$router.push({ path: '/edu/course/chapter/1' })
     },
     //获取一级分类
     initSubjectList(){
@@ -206,6 +230,22 @@ export default {
         .catch(response => {
           console.log(response)
         })
+    },
+    //  校验
+    beforeAvatarUpload(file){
+      const isJPG = file.type === 'image/jpeg'
+      const isLt2M = file.size / 1024 /1024 < 2
+      if (!isJPG) {
+        this.$message.error('上传头像图片只能是 JPG 格式!')
+      }
+      if (!isLt2M) {
+        this.$message.error('上传头像图片大小不能超过 2MB!')
+      }
+      return isJPG && isLt2M
+    },
+    // 上传成功回调
+    handleAvatarSuccess(res, file){
+      this.eduCourseDto.cover = res.data
     },
   }
 }
